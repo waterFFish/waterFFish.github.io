@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>全职高手·个人档案抽奖模拟器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: #FFFFFF;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 16px;
+        }
+        .card {
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 245, 245, 0.08);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 2px solid #b33a3a;
+            border-radius: 36px;
+            box-shadow: 0 20px 40px rgba(100, 0, 0, 0.6), 0 0 0 1px #ffdab3 inset;
+            padding: 24px 20px 30px;
+            transition: all 0.2s ease;
+        }
+        h1 {
+            text-align: center;
+            font-weight: 700;
+            font-size: 2rem;
+            letter-spacing: 3px;
+            color: #C00000;
+            text-shadow: 0 0 10px #ffffff, 0 3px 0 #660000;
+            margin-bottom: 8px;
+            word-break: break-word;
+        }
+        .sub {
+            text-align: center;
+            color: #ffe6e6;
+            font-size: 1rem;
+            margin-bottom: 28px;
+            border-bottom: 1px dashed #cc7a7a;
+            padding-bottom: 14px;
+            font-weight: 400;
+            letter-spacing: 1px;
+        }
+        .pool-badge {
+            background: rgba(80, 20, 20, 0.7);
+            border-radius: 60px;
+            padding: 8px 16px;
+            margin: 10px 0 22px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px 20px;
+            border: 1px solid #ffb3b3;
+            color: #fff0f0;
+            font-size: 0.9rem;
+        }
+        .pool-badge span {
+            background: #a52a2a;
+            padding: 4px 14px;
+            border-radius: 40px;
+            border-left: 3px solid #ffcccc;
+            font-weight: 500;
+            color: white;
+        }
+        .button-panel {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin: 20px 0 20px;
+        }
+        .draw-btn {
+            flex: 1 1 100px;
+            background: #b33a3a;
+            border: none;
+            border-radius: 60px;
+            padding: 16px 8px;
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: #ffffff;
+            box-shadow: 0 7px 0 #631d1d, 0 8px 12px black;
+            cursor: pointer;
+            transition: 0.08s linear;
+            letter-spacing: 1px;
+            border: 1px solid #ffa07a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .draw-btn:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #631d1d, 0 5px 12px black;
+        }
+        .draw-btn.single {
+            background: #c04848;
+        }
+        .draw-btn.five {
+            background: #a83232;
+        }
+        .draw-btn.ten {
+            background: #8b2323;
+        }
+        .return-btn {
+            background: #6d3f3f;
+            color: #ffe6e6;
+            flex: 0.4 1 100px;
+            font-size: 1.2rem;
+            padding: 12px 8px;
+            border: 1px solid #cc9f9f;
+            box-shadow: 0 5px 0 #3b2121, 0 8px 12px black;
+        }
+        .return-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #3b2121, 0 5px 12px black;
+        }
+
+        /* 统计面板 */
+        .stats-panel {
+            background: #330f0fcc;
+            border-radius: 28px;
+            padding: 18px 16px;
+            margin: 20px 0 20px;
+            border: 1px solid #d68b8b;
+            box-shadow: inset 0 0 10px #40000077, 0 6px 8px black;
+            color: #ffecec;
+        }
+        .stats-header {
+            font-size: 1.4rem;
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 16px;
+            background: #ac3a3a;
+            border-radius: 50px;
+            padding: 8px;
+            border-left: 5px solid #ffcccc;
+            color: white;
+        }
+        .stats-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .stats-col {
+            flex: 1 1 240px;
+            background: #2c0f0fcc;
+            border-radius: 20px;
+            padding: 14px 12px;
+            border: 1px solid #b76e6e;
+        }
+        .stats-col h4 {
+            text-align: center;
+            color: #ffdbdb;
+            border-bottom: 1px solid #b36666;
+            padding-bottom: 6px;
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+        }
+        .stats-list {
+            max-height: 200px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding-right: 6px;
+        }
+        .stat-item {
+            background: #3f1a1ab3;
+            border-radius: 30px;
+            padding: 6px 14px;
+            font-size: 0.9rem;
+            border-left: 4px solid #e69b9b;
+            display: flex;
+            justify-content: space-between;
+            color: #ffefef;
+        }
+        .stat-item.dim {
+            opacity: 0.5;
+            border-left-color: #886868;
+        }
+
+        /* 成就弹窗（首次解锁） */
+        .popup-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        .achievement-popup {
+            background: #fceaea;
+            border: 4px solid #b33a3a;
+            border-radius: 36px;
+            padding: 24px 28px;
+            max-width: 450px;
+            width: 90%;
+            box-shadow: 0 0 30px #ff8080;
+            position: relative;
+            color: #2c0f0f;
+        }
+        .popup-close {
+            position: absolute;
+            top: 12px; right: 18px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #a52a2a;
+            font-weight: bold;
+        }
+        .popup-close:hover { color: #ff0000; }
+        .popup-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #a52a2a;
+            text-align: center;
+            margin-bottom: 16px;
+            text-shadow: 0 0 5px #ffb3b3;
+        }
+        .popup-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .popup-achievement {
+            padding: 12px 18px;
+            border-radius: 40px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-align: center;
+            color: #111;
+            border: 2px solid #c55a5a;
+        }
+        .popup-achievement.gold { background: linear-gradient(145deg, #f5b81b, #d4a017); }
+        .popup-achievement.black { background: linear-gradient(145deg, #3a3a3a, #1f1f1f); color: #f0f0f0; }
+        .popup-achievement.purple { background: linear-gradient(145deg, #aa5fd9, #7b3fad); color: #f0e6ff; }
+        .popup-achievement.blue { background: linear-gradient(145deg, #3f8ad9, #1d5b9e); color: #e6f0ff; }
+        .popup-achievement .desc {
+            font-size: 0.85rem;
+            font-weight: normal;
+            margin-top: 6px;
+            color: #2d2d2d;
+        }
+        .popup-btn {
+            background: #b33a3a;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 30px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto;
+            box-shadow: 0 4px 0 #631d1d;
+            transition: 0.05s linear;
+            border: 1px solid #ffb3b3;
+        }
+        .popup-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 1px 0 #631d1d;
+        }
+
+        /* 成就记录区 */
+        .achievements-record {
+            background: #2f1313cc;
+            border-radius: 28px;
+            padding: 16px 16px;
+            margin: 20px 0 20px;
+            border: 1px solid #d68b8b;
+        }
+        .record-header {
+            font-size: 1.2rem;
+            color: #ffdbdb;
+            margin-bottom: 12px;
+            border-left: 5px solid #ffaaaa;
+            padding-left: 15px;
+        }
+        .record-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        .record-item {
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #111;
+            box-shadow: 0 2px 4px black;
+            white-space: nowrap;
+            border: 1px solid #ffffff;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .record-item:hover { filter: brightness(1.2); transform: scale(1.02); }
+        .record-item.gold { background: linear-gradient(145deg, #f5b81b, #d4a017); }
+        .record-item.black { background: linear-gradient(145deg, #3a3a3a, #1f1f1f); color: #f0f0f0; }
+        .record-item.purple { background: linear-gradient(145deg, #aa5fd9, #7b3fad); color: #f0e6ff; }
+        .record-item.blue { background: linear-gradient(145deg, #3f8ad9, #1d5b9e); color: #e6f0ff; }
+
+        /* 成就详情弹窗 */
+        .desc-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1100;
+        }
+        .desc-popup {
+            background: #fff2f2;
+            border: 3px solid #b33a3a;
+            border-radius: 28px;
+            padding: 24px 28px;
+            max-width: 380px;
+            width: 85%;
+            position: relative;
+            color: #330000;
+        }
+        .desc-close {
+            position: absolute;
+            top: 10px; right: 16px;
+            font-size: 26px;
+            cursor: pointer;
+            color: #a52a2a;
+        }
+        .desc-name {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #a52a2a;
+            margin-bottom: 15px;
+            padding-right: 20px;
+        }
+        .desc-text {
+            font-size: 1.1rem;
+            line-height: 1.5;
+            color: #3d1a1a;
+        }
+
+        /* 结果区域 */
+        .result-area {
+            background: #290f0fcc;
+            border-radius: 32px;
+            padding: 22px 18px;
+            margin-top: 20px;
+            border: 1px solid #f3b3b3;
+            min-height: 220px;
+            max-height: 380px;
+            overflow-y: auto;
+            box-shadow: inset 0 0 20px #4d000055, 0 10px 10px rgba(0,0,0,0.4);
+            scroll-behavior: smooth;
+        }
+        .result-title {
+            font-size: 1rem;
+            color: #ffdbdb;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .result-title span {
+            background: #a04141;
+            border-radius: 30px;
+            padding: 4px 14px;
+            font-size: 0.85rem;
+            color: #ffffff;
+        }
+        .prize-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .prize-item {
+            background: #4d2626e0;
+            border-radius: 40px;
+            padding: 12px 20px;
+            color: #ffecec;
+            font-size: 1.05rem;
+            border-left: 6px solid #e68a8a;
+            box-shadow: 0 2px 8px black;
+            word-break: break-word;
+            font-weight: 500;
+            backdrop-filter: blur(4px);
+            transition: 0.1s;
+            border: 1px solid #cc8080;
+        }
+        .prize-item::before {
+            content: "✨ ";
+            color: #ffb3b3;
+        }
+        .empty-result {
+            color: #dbb8b8;
+            text-align: center;
+            padding: 40px 0;
+            font-style: italic;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+        }
+        footer {
+            text-align: center;
+            color: #e0b3b3;
+            margin-top: 18px;
+            font-size: 0.75rem;
+        }
+        .note {
+            color: #f2c2c2;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-top: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>全职高手·个人档案</h1>
+        <div class="sub">🏆 抽奖模拟器 · V2</div>
+
+        <div class="pool-badge">
+            <span>📸 拍立得</span>
+            <span>📁 文件夹</span>
+            <span>💬 名言条</span>
+            <span>🎖️ 徽章</span>
+            <span>🎴 色纸</span>
+            <span>🧸 立牌</span>
+            <span>🖼️ 版画</span>
+            <span>🧣 毯子</span>
+            <span>🌈 隐藏款</span>
+        </div>
+
+        <div class="button-panel">
+            <button class="draw-btn single" id="drawSingle">单抽</button>
+            <button class="draw-btn five" id="drawFive">五连抽</button>
+            <button class="draw-btn ten" id="drawTen">十连抽</button>
+            <button class="draw-btn return-btn" id="returnBtn">↺ 返回</button>
+        </div>
+
+        <!-- 统计面板 -->
+        <div class="stats-panel">
+            <div class="stats-header">累计抽奖次数: <span id="totalDraws">0</span></div>
+            <div class="stats-row">
+                <div class="stats-col">
+                    <h4>🏅 选手统计</h4>
+                    <div id="playerStats" class="stats-list"></div>
+                </div>
+                <div class="stats-col">
+                    <h4>📦 品类统计</h4>
+                    <div id="categoryStats" class="stats-list"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 成就记录区 -->
+        <div class="achievements-record">
+            <div class="record-header">✨ 已获得成就（点击查看详情）</div>
+            <div class="record-list" id="achievementRecordList"></div>
+        </div>
+
+        <!-- 抽奖结果区 -->
+        <div class="result-area" id="resultArea">
+            <div class="result-title">
+                <span>🏅 抽奖结果</span>
+            </div>
+            <div id="resultContainer">
+                <div class="empty-result">点击上方按钮开始抽奖<br>⭐ 满载星辉 ⭐</div>
+            </div>
+        </div>
+        <div class="note">* 每次抽取独立概率，基于官方设定表 *</div>
+        <footer>全14位选手 + 全员端盒 | 总计174项奖品</footer>
+    </div>
+
+    <!-- 首次解锁成就弹窗 (遮罩+弹窗) -->
+    <div class="popup-overlay" id="popupOverlay">
+        <div class="achievement-popup">
+            <span class="popup-close" id="closePopupBtn">&times;</span>
+            <div class="popup-title">🏆 恭喜你取得成就</div>
+            <div class="popup-list" id="popupAchievementList"></div>
+            <button class="popup-btn" id="closePopupBtn2">收下成就</button>
+        </div>
+    </div>
+
+    <!-- 成就详情弹窗 (点击具体成就时出现) -->
+    <div class="desc-overlay" id="descOverlay">
+        <div class="desc-popup">
+            <span class="desc-close" id="closeDescBtn">&times;</span>
+            <div class="desc-name" id="descName"></div>
+            <div class="desc-text" id="descText"></div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ---------- 选手列表 ----------
+            const PLAYERS = [
+                "叶修", "喻文州", "黄少天", "王杰希", "周泽楷", "孙翔", "苏沐橙",
+                "方锐", "李轩", "楚云秀", "肖时钦", "张佳乐", "张新杰", "唐昊"
+            ];
+
+            // ---------- 品类配置 ----------
+            const CATEGORIES = [
+                { name: "拍立得A选手款", prob: 0.00715, forAll: false },
+                { name: "拍立得B角色卡款", prob: 0.00715, forAll: false },
+                { name: "文件夹选手款", prob: 0.00715, forAll: false },
+                { name: "名言条选手款", prob: 0.00715, forAll: false },
+                { name: "徽章A选手款", prob: 0.0072748, forAll: false },
+                { name: "徽章B角色款", prob: 0.0072748, forAll: false },
+                { name: "徽章C选手彩色特别款", prob: 0.0072748, forAll: false },
+                { name: "色纸", prob: 0.0072748, forAll: false },
+                { name: "隐藏彩色拍立得", prob: 0.004897, forAll: false },
+                { name: "立牌", prob: 0.004897, forAll: false },
+                { name: "拍立得端盒", prob: 0.004897, forAll: true },
+                { name: "毯子", prob: 0.0015212, forAll: false },
+                { name: "徽章端盒", prob: 0.001521, forAll: true },
+                { name: "文件夹端盒", prob: 0.001521, forAll: true },
+                { name: "名言条端盒", prob: 0.001521, forAll: true },
+                { name: "版画", prob: 0.0015212, forAll: false },
+                { name: "色纸端盒", prob: 0.0015208, forAll: true },
+                { name: "立牌端盒", prob: 0.0015208, forAll: true }
+            ];
+
+            // 定义所有成就的说明文本 (可根据名称动态生成)
+            const achievementDescriptions = {
+                // 天赐XXX手 动态生成，这里用函数
+                tianci: (player) => `在十连抽中，抽到同一选手“${player}”的奖品超过3个（≥4）`,
+                xiaoshoubingliang: '在十连抽中，只抽到拍立得或名言条类奖品（不包括其他品类）',
+                choujiangdashi: '单抽抽到叶修/喻文州/王杰希/黄少天/周泽楷的立牌/版画/毯子，或任何全员端盒',
+                douzoudouba: '在十连抽中，抽到2个或以上全员端盒类产品',
+                lippaizhong: '第一次抽到立牌端盒时自动获得',
+                rongyao: '在十连抽中，抽到十个不同选手的奖品',
+                douzhe: '累计抽奖次数达到100抽',
+                manlijie: '累计抽奖次数达到500抽',
+                yichie: '累计抽奖次数达到1000抽',
+                biye: (player) => `累计抽奖中，抽到${player}的全部12个普通品类（即集齐该选手所有非端盒类）`
+            };
+
+            // 构建奖品数组
+            const prizes = [];
+            CATEGORIES.forEach(cat => {
+                if (cat.forAll) {
+                    prizes.push({
+                        name: `全员 ${cat.name}`,
+                        prob: cat.prob
+                    });
+                } else {
+                    PLAYERS.forEach(player => {
+                        prizes.push({
+                            name: `${player} ${cat.name}`,
+                            prob: cat.prob
+                        });
+                    });
+                }
+            });
+
+            // 累积概率
+            const cumulative = [];
+            let sum = 0;
+            for (let i = 0; i < prizes.length; i++) {
+                sum += prizes[i].prob;
+                cumulative[i] = sum;
+            }
+            const totalProb = sum;
+
+            // ===== 成就系统所需全局变量 =====
+            let totalPrizesDrawn = 0;
+            const allPlayers = PLAYERS.concat('全员');
+            const allCategories = CATEGORIES.map(cat => cat.name);
+            const NORMAL_CATEGORIES = allCategories.filter(c => !c.includes('端盒'));
+
+            let playerCounts = {};
+            let categoryCounts = {};
+            allPlayers.forEach(p => playerCounts[p] = 0);
+            allCategories.forEach(c => categoryCounts[c] = 0);
+
+            // 选手收集品类
+            let playerCollectedSets = new Map();
+            PLAYERS.forEach(p => playerCollectedSets.set(p, new Set()));
+
+            // 已获得成就ID
+            let earnedAchievements = new Set();
+            // 成就记录列表 (用于显示)
+            let earnedAchievementList = []; // 存储 { id, name, color }
+
+            // ---------- 辅助函数 ----------
+            function getPlayerFromName(fullName) {
+                const space = fullName.indexOf(' ');
+                if (space === -1) return fullName;
+                return fullName.substring(0, space);
+            }
+
+            function getCategoryFromName(fullName) {
+                const space = fullName.indexOf(' ');
+                if (space === -1) return '';
+                return fullName.substring(space + 1);
+            }
+
+            function isPolaroidOrQuote(category) {
+                return category.includes('拍立得') || category.includes('名言条');
+            }
+
+            function isDuanhe(prize) {
+                const cat = getCategoryFromName(prize.name);
+                return cat.includes('端盒');
+            }
+
+            function isLippaiDuanhe(prize) {
+                return getCategoryFromName(prize.name) === '立牌端盒';
+            }
+
+            function isSpecialSingle(prize) {
+                const player = getPlayerFromName(prize.name);
+                const cat = getCategoryFromName(prize.name);
+                const specialPlayers = ['叶修', '喻文州', '王杰希', '黄少天', '周泽楷'];
+                if (specialPlayers.includes(player) && ['立牌', '版画', '毯子'].includes(cat)) {
+                    return true;
+                }
+                if (player === '全员' && cat.includes('端盒')) {
+                    return true;
+                }
+                return false;
+            }
+
+            function countPlayerInPrizes(prizes, player) {
+                return prizes.filter(p => getPlayerFromName(p.name) === player).length;
+            }
+
+            function getDistinctPlayers(prizes) {
+                const players = new Set();
+                prizes.forEach(p => {
+                    const pl = getPlayerFromName(p.name);
+                    if (pl !== '全员') players.add(pl);
+                });
+                return players;
+            }
+
+            // 更新统计
+            function updateStatsFromPrizes(prizesArray) {
+                prizesArray.forEach(prize => {
+                    const name = prize.name;
+                    const spaceIndex = name.indexOf(' ');
+                    if (spaceIndex === -1) return;
+                    const player = name.substring(0, spaceIndex);
+                    const category = name.substring(spaceIndex + 1);
+
+                    if (playerCounts.hasOwnProperty(player)) {
+                        playerCounts[player]++;
+                    } else {
+                        playerCounts[player] = 1;
+                    }
+
+                    if (categoryCounts.hasOwnProperty(category)) {
+                        categoryCounts[category]++;
+                    } else {
+                        categoryCounts[category] = 1;
+                    }
+
+                    if (player !== '全员' && NORMAL_CATEGORIES.includes(category)) {
+                        const set = playerCollectedSets.get(player);
+                        if (set) set.add(category);
+                    }
+                });
+                totalPrizesDrawn += prizesArray.length;
+            }
+
+            // 刷新统计显示
+            function refreshStatsDisplay() {
+                document.getElementById('totalDraws').innerText = totalPrizesDrawn;
+
+                const playerStatsDiv = document.getElementById('playerStats');
+                let playerHtml = '';
+                allPlayers.forEach(player => {
+                    const count = playerCounts[player] || 0;
+                    const dimClass = count === 0 ? 'dim' : '';
+                    playerHtml += `<div class="stat-item ${dimClass}">${player}: ${count}</div>`;
+                });
+                playerStatsDiv.innerHTML = playerHtml;
+
+                const categoryStatsDiv = document.getElementById('categoryStats');
+                let categoryHtml = '';
+                allCategories.forEach(cat => {
+                    const count = categoryCounts[cat] || 0;
+                    const dimClass = count === 0 ? 'dim' : '';
+                    categoryHtml += `<div class="stat-item ${dimClass}">${cat}: ${count}</div>`;
+                });
+                categoryStatsDiv.innerHTML = categoryHtml;
+            }
+
+            // 成就检测
+            function checkAchievements(prizesArray, mode) {
+                const newAchieve = []; // { id, name, color, desc }
+
+                function addIfNotEarned(id, name, color, desc) {
+                    if (!earnedAchievements.has(id)) {
+                        newAchieve.push({ id, name, color, desc });
+                        earnedAchievements.add(id);
+                    }
+                }
+
+                // 成就1
+                if (mode === 'ten') {
+                    PLAYERS.forEach(player => {
+                        const count = countPlayerInPrizes(prizesArray, player);
+                        if (count >= 4) {
+                            const id = `tianci_${player}`;
+                            const name = `天赐${player}手`;
+                            const desc = achievementDescriptions.tianci(player);
+                            addIfNotEarned(id, name, 'gold', desc);
+                        }
+                    });
+                }
+
+                // 成就2
+                if (mode === 'ten') {
+                    const allOk = prizesArray.every(p => {
+                        const cat = getCategoryFromName(p.name);
+                        return isPolaroidOrQuote(cat);
+                    });
+                    if (allOk && prizesArray.length > 0) {
+                        addIfNotEarned('xiaoshoubingliang', '小手冰凉', 'black', achievementDescriptions.xiaoshoubingliang);
+                    }
+                }
+
+                // 成就3
+                if (mode === 'single') {
+                    if (prizesArray.length === 1 && isSpecialSingle(prizesArray[0])) {
+                        addIfNotEarned('choujiangdashi', '抽奖大师', 'purple', achievementDescriptions.choujiangdashi);
+                    }
+                }
+
+                // 成就4
+                if (mode === 'ten') {
+                    const duanheCount = prizesArray.filter(p => isDuanhe(p)).length;
+                    if (duanheCount >= 2) {
+                        addIfNotEarned('douzoudouba', '你都端走吧！', 'gold', achievementDescriptions.douzoudouba);
+                    }
+                }
+
+                // 成就5
+                const hasLippaiDuanhe = prizesArray.some(p => isLippaiDuanhe(p));
+                if (hasLippaiDuanhe) {
+                    addIfNotEarned('lippaizhong', '真的抽中我也会为你高兴的', 'purple', achievementDescriptions.lippaizhong);
+                }
+
+                // 成就6
+                if (mode === 'ten') {
+                    const distinctPlayers = getDistinctPlayers(prizesArray);
+                    if (distinctPlayers.size === 10 && prizesArray.every(p => getPlayerFromName(p.name) !== '全员')) {
+                        addIfNotEarned('rongyao', '荣耀不是一个人的游戏', 'purple', achievementDescriptions.rongyao);
+                    }
+                }
+
+                // 成就7-9
+                if (totalPrizesDrawn >= 100) addIfNotEarned('douzhe', '满级理解', 'blue', achievementDescriptions.douzhe);
+                if (totalPrizesDrawn >= 500) addIfNotEarned('manlijie', '斗者意志', 'blue', achievementDescriptions.manlijie);
+                if (totalPrizesDrawn >= 1000) addIfNotEarned('yichie', '一切不过是从头再来罢了', 'blue', achievementDescriptions.yichie);
+
+                // 成就10
+                PLAYERS.forEach(player => {
+                    const collected = playerCollectedSets.get(player)?.size || 0;
+                    if (collected >= NORMAL_CATEGORIES.length) {
+                        const id = `biye_${player}`;
+                        const name = `${player}毕业了`;
+                        const desc = achievementDescriptions.biye(player);
+                        addIfNotEarned(id, name, 'blue', desc);
+                    }
+                });
+
+                return newAchieve;
+            }
+
+            // 刷新成就记录显示（可点击）
+            function refreshAchievementRecord() {
+                const recordDiv = document.getElementById('achievementRecordList');
+                let html = '';
+                earnedAchievementList.forEach(ach => {
+                    html += `<span class="record-item ${ach.color}" data-id="${ach.id}" data-name="${ach.name}" data-desc="${ach.desc}">${ach.name}</span>`;
+                });
+                recordDiv.innerHTML = html;
+
+                // 为所有成就记录添加点击事件
+                document.querySelectorAll('.record-item').forEach(el => {
+                    el.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        const name = this.getAttribute('data-name');
+                        const desc = this.getAttribute('data-desc');
+                        showDescription(name, desc);
+                    });
+                });
+            }
+
+            // 显示成就详情弹窗
+            function showDescription(name, desc) {
+                document.getElementById('descName').innerText = name;
+                document.getElementById('descText').innerText = desc;
+                document.getElementById('descOverlay').style.display = 'flex';
+            }
+
+            // 隐藏成就详情弹窗
+            function hideDescription() {
+                document.getElementById('descOverlay').style.display = 'none';
+            }
+
+            // 显示首次解锁弹窗
+            function showFirstUnlockPopup(achievements) {
+                if (achievements.length === 0) return;
+                const listDiv = document.getElementById('popupAchievementList');
+                let html = '';
+                achievements.forEach(ach => {
+                    html += `<div class="popup-achievement ${ach.color}">${ach.name}<div class="desc">${ach.desc}</div></div>`;
+                });
+                listDiv.innerHTML = html;
+                document.getElementById('popupOverlay').style.display = 'flex';
+            }
+
+            function hideFirstUnlockPopup() {
+                document.getElementById('popupOverlay').style.display = 'none';
+            }
+
+            // 重置成就
+            function resetAchievements() {
+                earnedAchievements.clear();
+                earnedAchievementList = [];
+                playerCollectedSets.clear();
+                PLAYERS.forEach(p => playerCollectedSets.set(p, new Set()));
+                refreshAchievementRecord();
+                hideFirstUnlockPopup();
+            }
+
+            // 核心抽取
+            function drawOne() {
+                const rand = Math.random() * totalProb;
+                for (let i = 0; i < cumulative.length; i++) {
+                    if (rand < cumulative[i]) {
+                        return prizes[i];
+                    }
+                }
+                return prizes[prizes.length - 1];
+            }
+
+            function drawMultiple(count) {
+                const results = [];
+                for (let i = 0; i < count; i++) {
+                    results.push(drawOne());
+                }
+                return results;
+            }
+
+            // UI元素
+            const resultContainer = document.getElementById('resultContainer');
+            const drawSingleBtn = document.getElementById('drawSingle');
+            const drawFiveBtn = document.getElementById('drawFive');
+            const drawTenBtn = document.getElementById('drawTen');
+            const returnBtn = document.getElementById('returnBtn');
+            const closePopupBtn = document.getElementById('closePopupBtn');
+            const closePopupBtn2 = document.getElementById('closePopupBtn2');
+            const closeDescBtn = document.getElementById('closeDescBtn');
+
+            function displayResults(prizeItems) {
+                let html = '';
+                if (prizeItems.length === 0) {
+                    html = '<div class="empty-result">✨ 虚空等待 ✨</div>';
+                } else {
+                    html = '<ul class="prize-list">';
+                    prizeItems.forEach(item => {
+                        html += `<li class="prize-item">恭喜您抽中了 ${item.name}</li>`;
+                    });
+                    html += '</ul>';
+                }
+                resultContainer.innerHTML = html;
+                document.getElementById('resultArea').scrollTop = 0;
+            }
+
+            function clearResult() {
+                resultContainer.innerHTML = '<div class="empty-result">点击上方按钮开始抽奖<br>⭐ 满载星辉 ⭐</div>';
+            }
+
+            // 抽奖处理
+            function handleDraw(mode, count) {
+                const result = drawMultiple(count);
+                updateStatsFromPrizes(result);
+                refreshStatsDisplay();
+                displayResults(result);
+
+                const newAchieve = checkAchievements(result, mode);
+                if (newAchieve.length > 0) {
+                    // 加入记录列表
+                    newAchieve.forEach(ach => {
+                        earnedAchievementList.push({ id: ach.id, name: ach.name, color: ach.color, desc: ach.desc });
+                    });
+                    // 显示首次解锁弹窗（带说明）
+                    showFirstUnlockPopup(newAchieve);
+                }
+                refreshAchievementRecord();
+            }
+
+            // 绑定事件
+            drawSingleBtn.addEventListener('click', () => handleDraw('single', 1));
+            drawFiveBtn.addEventListener('click', () => handleDraw('five', 5));
+            drawTenBtn.addEventListener('click', () => handleDraw('ten', 10));
+
+            returnBtn.addEventListener('click', () => {
+                totalPrizesDrawn = 0;
+                allPlayers.forEach(p => playerCounts[p] = 0);
+                allCategories.forEach(c => categoryCounts[c] = 0);
+                resetAchievements();
+                refreshStatsDisplay();
+                clearResult();
+            });
+
+            // 关闭首次解锁弹窗
+            closePopupBtn.addEventListener('click', hideFirstUnlockPopup);
+            closePopupBtn2.addEventListener('click', hideFirstUnlockPopup);
+            // 点击遮罩也可关闭（可选）
+            document.getElementById('popupOverlay').addEventListener('click', function(e) {
+                if (e.target === this) hideFirstUnlockPopup();
+            });
+
+            // 关闭详情弹窗
+            closeDescBtn.addEventListener('click', hideDescription);
+            document.getElementById('descOverlay').addEventListener('click', function(e) {
+                if (e.target === this) hideDescription();
+            });
+
+            // 初始化
+            refreshStatsDisplay();
+            clearResult();
+            refreshAchievementRecord();
+        })();
+    </script>
+</body>
+</html>
